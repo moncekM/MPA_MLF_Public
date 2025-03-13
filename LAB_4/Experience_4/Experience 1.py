@@ -122,10 +122,18 @@ def assign_centroids(distances: np.ndarray,k_clusters: int) -> np.ndarray:
     assigned_centroids = np.array([])
     split = len(distances)//k_clusters
     split_distances = np.array_split(distances, split)
+    distance_to_centroid = np.array([])
     #print(split_distances)
     for i in range(len(split_distances)):
+        #print(split_distances[i])
         assigned_centroids = np.append(assigned_centroids, np.argmin(split_distances[i]))
+        distance_to_centroid =np.append(distance_to_centroid,np.min(split_distances[i]))
+    global objective_function_value
+    objective_function_value = np.sum(distance_to_centroid)
     #print(assigned_centroids)
+    #print(distance_to_centroid)
+
+
     ###################################
 
     return assigned_centroids
@@ -148,23 +156,61 @@ def calculate_objective(assigned_centroids: np.ndarray, distances: np.ndarray) -
     onjective_function_value: float32
 
 
+    This function is reduced and it's work is done in the assign_centroids function.
+
     """
     ###################################
     # Write your own code here #
 
     objective_function_value = 0.0
-    for i in range(len(assigned_centroids)):
-        objective_function_value += (np.sum(distances[i] - assigned_centroids) ** 2)
+        #calculate the distances to the corect centroid and then I sum it op
 
     ###################################
 
     return objective_function_value
 
+
+def calculate_new_centroids(points: np.ndarray, assigned_centroids: np.ndarray, k_clusters: int) -> np.ndarray:
+    """
+    Computes new centroids based on the current cluster assignments.
+
+    Parameters:
+    :param points: Array of n data points.
+    :type points: ndarray with shape (n, 2)
+
+    :param assigned_centroids: Array indicating the closest centroid for each data point.
+    :type assigned_centroids: ndarray with shape (1, n) and dtype = np.int32
+
+
+    :param k_clusters: Number of clusters.
+    :type k_clusters: int
+
+
+    :return: new_clusters
+    new_clusters: new cluster points
+
+    :rtype:
+    new_clusters: ndarray with shape (1, n) and dtype = np.float32
+    """
+
+    ###################################
+    # Write your own code here #
+    new_clusters = np.array([])
+    for i in range(k_clusters):
+        closest_cluster = np.array([])
+        for j in range(len(assigned_centroids)):
+            if assigned_centroids[j] == i:
+                closest_cluster = np.append(closest_cluster, points[j])
+        print(closest_cluster)
+    ###################################
+
+    return new_clusters
 print(len(loaded_points))
 plt.figure()
 plt.scatter(loaded_points[:,0],loaded_points[:,1])
 plt.show()
 k=3
+objective_function_value = 0.0
 rand_points=initialize_clusters(loaded_points,k)
 print(rand_points)
 cluster_points = np.array([])
@@ -174,5 +220,7 @@ distances = compute_distances(loaded_points, rand_points,k)
 assigned_centroids = assign_centroids(distances,k)
 print(assigned_centroids)
 print(len(assigned_centroids))
-objective_function_value = calculate_objective(assigned_centroids, distances)
 print(objective_function_value)
+#objective_function_value = calculate_objective(assigned_centroids, distances)
+#print(objective_function_value)
+calculate_new_centroids(loaded_points, assigned_centroids, k)
