@@ -1,4 +1,3 @@
-"Inport of libraries"
 import numpy as np
 import copy
 from numpy.linalg import norm
@@ -197,30 +196,76 @@ def calculate_new_centroids(points: np.ndarray, assigned_centroids: np.ndarray, 
     # Write your own code here #
     new_clusters = np.array([])
     for i in range(k_clusters):
-        closest_cluster = np.array([])
+        closest_cluster =np.empty((0, 2))
         for j in range(len(assigned_centroids)):
             if assigned_centroids[j] == i:
-                closest_cluster = np.append(closest_cluster, points[j])
-        print(closest_cluster)
+                closest_cluster = np.vstack((closest_cluster, points[j]))
+                #print(closest_cluster)
+        new_clusters = np.append(new_clusters, np.average(closest_cluster, axis=0))
+    #print(new_clusters)
     ###################################
 
     return new_clusters
+
+def fit(points: np.ndarray, k_clusters: int, n_of_iterations: int, error: float = 0.001) -> tuple:
+    """
+    Fits the k-means clustering model on the dataset.
+
+    Parameters:
+    :param points : Array of data points.
+    :type points: ndarray with shape (n, 2) and dtype = np.float32
+
+    :param k_clusters:  Number of clusters
+    :type k_clusters: int
+
+    :param n_of_iterations:  Maximum number of iterations
+    :type n_of_iterations: int
+
+
+    :param error: Threshold for convergence.
+    :type error: float
+
+    :return: centroid_points, last_objective
+    centroid_points: final centroid points
+    last_objective: final objective funtion
+
+    :rtype:
+    centroid_points: ndarray with shape (k_clusters, 2) and dtype = np.float32
+    last_objective: float
+
+    """
+
+    ###################################
+    # Write your own code here #
+
+    centroid_points = np.array([])
+    last_objective = 10000.0
+    calc_error = 0.001
+    for i in range(n_of_iterations):
+        if i == 0:
+            rand_points = initialize_clusters(loaded_points, k)
+            print(rand_points)
+            distances = compute_distances(loaded_points, rand_points, k)
+        else:
+            distances = compute_distances(loaded_points, centroid_points, k)
+        assigned_centroids = assign_centroids(distances, k)
+        calc_error = abs(objective_function_value - last_objective)
+        last_objective = objective_function_value
+        print(objective_function_value)
+        print(error)
+        centroid_points = calculate_new_centroids(loaded_points, assigned_centroids, k)
+        print(centroid_points)
+        if calc_error < error:
+            print("function end with error", calc_error)
+            break
+    ###################################
+
+    return centroid_points, last_objective
+
 print(len(loaded_points))
 plt.figure()
 plt.scatter(loaded_points[:,0],loaded_points[:,1])
 plt.show()
 k=3
 objective_function_value = 0.0
-rand_points=initialize_clusters(loaded_points,k)
-print(rand_points)
-cluster_points = np.array([])
-#cluster_poitrn = calculate_metric(loaded_points, rand_points[1])
-distances = compute_distances(loaded_points, rand_points,k)
-#print(distances)
-assigned_centroids = assign_centroids(distances,k)
-print(assigned_centroids)
-print(len(assigned_centroids))
-print(objective_function_value)
-#objective_function_value = calculate_objective(assigned_centroids, distances)
-#print(objective_function_value)
-calculate_new_centroids(loaded_points, assigned_centroids, k)
+fit(loaded_points, k, n_of_iterations=20,error=5)
