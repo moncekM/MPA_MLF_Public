@@ -252,12 +252,15 @@ def fit(points: np.ndarray, k_clusters: int, n_of_iterations: int, error: float 
         calc_error = abs(objective_function_value - last_objective)
         last_objective = objective_function_value
         print(objective_function_value)
-        print(error)
+        print(calc_error)
         centroid_points = calculate_new_centroids(loaded_points, assigned_centroids, k)
         print(centroid_points)
         if calc_error < error:
             print("function end with error", calc_error)
             break
+        if i == n_of_iterations - 1:
+            print("function end due to number of iteration with error", calc_error)
+
     ###################################
 
     return centroid_points, last_objective
