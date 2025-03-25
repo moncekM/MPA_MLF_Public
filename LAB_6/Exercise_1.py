@@ -1,9 +1,5 @@
-from keras.models import Sequential
-from keras.models import Sequential
-from keras.layers import Dense, Flatten
-from keras.optimizers import SGD
-from keras.datasets import cifar10
-from keras.utils import to_categorical
+import keras
+from keras import Sequential
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
@@ -13,7 +9,7 @@ font = {'weight' : 'bold',
 
 matplotlib.rc('font', **font)
 
-(X_train, y_train), (X_test, y_test) = cifar10.load_data()
+(X_train, y_train), (X_test, y_test) = keras.datasets.cifar10.load_data()
 
 labels = {0:'airplane',1:'automobile',2:'bird',3:'cat',4:'deer',5:'dog',6:'frog',7:'horse',8:'ship',9:'truck'}
 
@@ -54,19 +50,19 @@ def display_channels_separately(image: np.array) -> None:
   
   display_channels_separately(X_train[0])
   X_train_scaled = X_train.astype('float32') / 255.0
-  y_train_encoded = to_categorical(y_train, num_classes=10)
+  y_train_encoded = keras.to_categorical(y_train, num_classes=10)
   model = Sequential()
-  model.add(Flatten(input_shape=(32, 32, 3)))
-  model.add(Dense(128, activation='sigmoid'))
-  model.add(Dense(10, activation='relu'))
-  model.add(Dense(128, activation='relu'))
-  model.add(Dense(10, activation='softmax'))
+  model.add(keras.Flatten(input_shape=(32, 32, 3)))
+  model.add(keras.Dense(128, activation='sigmoid'))
+  model.add(keras.Dense(10, activation='relu'))
+  model.add(keras.Dense(128, activation='relu'))
+  model.add(keras.Dense(10, activation='softmax'))
   model.summary()
-  optimizer = SGD(learning_rate = 0.001)
+  optimizer = keras.SGD(learning_rate = 0.001)
   model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])  
   history = model.fit(X_train_scaled, y_train_encoded, epochs=50, batch_size=25, validation_split = 0.01)
   X_test = X_test.astype('float32') / 255.0
-  y_test_encoded = to_categorical(y_test, num_classes=10)
+  y_test_encoded =keras.to_categorical(y_test, num_classes=10)
   score = model.evaluate(X_test, y_test_encoded, verbose=0)
   print('Test loss:', score[0])
   print(f'Test accuracy: {score[1]*100} %')
