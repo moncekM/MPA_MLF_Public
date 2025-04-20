@@ -1,10 +1,15 @@
 import numpy as np
 import copy
+
+import sklearn.cluster
 from numpy.linalg import norm
 from sklearn.cluster import KMeans
 from scipy.constants import R
 from sklearn.datasets import load_iris
 import matplotlib.pyplot as plt
+from matplotlib.image import imread
+from sklearn import *
+import numpy as np
 
 "Load data to project"
 loaded_points = np.load('k_mean_points.npy')
@@ -243,18 +248,18 @@ def fit(points: np.ndarray, k_clusters: int, n_of_iterations: int, error: float 
     calc_error = 0.001
     for i in range(n_of_iterations):
         if i == 0:
-            rand_points = initialize_clusters(loaded_points, k)
-            print(rand_points)
-            distances = compute_distances(loaded_points, rand_points, k)
+            rand_points = initialize_clusters(points, k_clusters)
+            #print(rand_points)
+            distances = compute_distances(points, rand_points, k_clusters)
         else:
-            distances = compute_distances(loaded_points, centroid_points, k)
-        assigned_centroids = assign_centroids(distances, k)
+            distances = compute_distances(points, centroid_points, k_clusters)
+        assigned_centroids = assign_centroids(distances, k_clusters)
         calc_error = abs(objective_function_value - last_objective)
         last_objective = objective_function_value
-        print(objective_function_value)
-        print(calc_error)
-        centroid_points = calculate_new_centroids(loaded_points, assigned_centroids, k)
-        print(centroid_points)
+        #print(objective_function_value)
+        #print(calc_error)
+        centroid_points = calculate_new_centroids(points, assigned_centroids, k_clusters)
+        #print(centroid_points)
         if calc_error < error:
             print("function end with error", calc_error)
             break
@@ -265,10 +270,79 @@ def fit(points: np.ndarray, k_clusters: int, n_of_iterations: int, error: float 
 
     return centroid_points, last_objective
 
+
+def elbow_method() :
+    k_all = range(2, 10)
+    all_objective = []
+
+
+#WRITE YOUR CODE HERE
+    for k in k_all:
+        fit(loaded_points, k, n_of_iterations=50, error=3)
+        all_objective.append(objective_function_value)
+
+    plt.figure()
+    plt.plot(k_all, all_objective)
+    plt.xlabel('K clusters')
+    plt.ylabel('Sum of squared distance')
+    plt.show()
+
+#unfortunetly the elbow method is not working for this dataset,
+# because it is too small difference between iterations so the elbow is not visible at the graph
+#so fot this dataset is best to use either fixed number of cluster defined form graph of dataset of the silhouette score
+# which implementation is byonde scope of this exercise
+
+
+loaded_image = imread('fish.jpg')
+
+plt.figure()
+plt.imshow(loaded_image)
+plt.show()
+
+def compress_image(image: np.ndarray, number_of_colours: int) -> np.ndarray:
+    """
+    Compresses the given image by reducing the number of colours used in the image.
+
+    This function applies k-means clustering to group the pixel colours of the image
+    into 'number_of_colours' clusters. Each pixel's colour in the image is then replaced
+    with the colour of the closest centroid of these clusters. This process effectively
+    reduces the number of colours in the image, resulting in compression.
+
+    Parameters:
+    image (np.array): The original image is represented as a 3D numpy array
+                      (height x width x color_channels).
+    number_of_colours (int): The number of colours to reduce the image to.
+
+    Returns:
+    np.array: The compressed image as a numpy array in the same shape as the input.
+    """
+    height, width, color_channels = image.shape
+    array_image = image.reshape(width*height, color_channels)
+
+    new_colors,_ = fit(array_image, number_of_colours, n_of_iterations=100, error=0.001)
+
+    # Create the compressed image by mapping each pixel to its centroid color
+    compressed = np.zeros_like(array_image)
+    centroids = new_colors.reshape(-1, number_of_colours, color_channels)
+   # Reshape back to original image dimensions
+    compressed_image = compressed.reshape(height, width, color_channels)
+
+    return image
+
+
+
+
 print(len(loaded_points))
 plt.figure()
 plt.scatter(loaded_points[:,0],loaded_points[:,1])
 plt.show()
-k=3
+
 objective_function_value = 0.0
-fit(loaded_points, k, n_of_iterations=20,error=5)
+#fit(loaded_points, 5, n_of_iterations=20,error=5)
+elbow_method()
+
+img = compress_image(loaded_image, 1024)
+
+plt.figure()
+plt.imshow(img)
+plt.show()
